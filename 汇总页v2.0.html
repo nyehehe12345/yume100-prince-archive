@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>夢世界の王子様</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px 0 15px;
+            background-image: url('picture/background.png');
+            background-repeat: repeat;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            font-family: 'ChineseFont', sans-serif;
+        }
+
+        @font-face {
+            font-family: 'ChineseFont';
+            src: url('./fonts/中文字体.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        .title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .gallery-container {
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .gallery {
+            display: flex;
+            align-items: center;
+            transition: transform 0.5s ease;
+            height: 550px;
+            position: relative;
+        }
+
+        .frame {
+            width: 320px;
+            height: 520px;
+            margin: 0 30px;
+            position: relative;
+            transition: all 0.5s ease;
+            background-image: url('picture/background2.png');
+            background-repeat: repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('picture/边框.png');
+            background-size: 100% 100% !important;
+            background-repeat: no-repeat;
+            background-position: center;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .frame img {
+            width: auto;
+            height: calc(100% - 20px);
+            object-fit: contain;
+            margin-top: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .frame.center {
+            transform: scale(1.1);
+            z-index: 1;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 60px;
+            height: 60px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-button.left {
+            left: -90px;
+            background-image: url('picture/左箭头.png');
+        }
+        .nav-button.right {
+            right: -120px;
+            background-image: url('picture/右箭头.png');
+        }
+
+        .character-link {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            color: rgb(0, 0, 0);
+            z-index: 1001;
+            min-width: 300px;
+        }
+
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #666;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgb(0, 0, 0);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .modal button {
+            padding: 8px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .modal button.confirm {
+            background: #d4ba5b;
+            color: white;
+        }
+
+        .modal button.cancel {
+            background: #656565;
+            color: white;
+        }
+
+        .add-button, .delete-button {
+            position: fixed;
+            top: 20px;
+            width: 60px;
+            height: 60px;
+            background-size: contain;
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.2s ease;
+        }
+        .add-button {
+            left: 20px;
+            background-image: url('picture/增加.png');
+        }
+        .delete-button {
+            left: 100px;
+            background-image: url('picture/删除.png');
+        }
+
+        .add-button:hover {
+            transform: scale(1.1);
+        }
+
+        .delete-button:hover {
+            transform: scale(1.1);
+        }
+
+        .construction-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px 50px;
+            border-radius: 15px;
+            color: #d4ba5b;
+            z-index: 1002;
+            text-align: center;
+            font-size: 24px;
+            box-shadow: 0 0 20px rgba(255, 223, 0, 0.5);
+            border: 2px solid goldenrod;
+        }
+
+        .character-info {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px auto;
+            width: 85%;
+            max-width: 1200px;
+            color: #d4ba5b;
+            box-shadow: 0 0 15px rgba(212, 186, 91, 0.3);
+            border: 1px solid rgba(212, 186, 91, 0.5);
+        }
+
+        .info-title {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 25px;
+            border-bottom: 2px dashed #d4ba5b;
+            padding-bottom: 10px;
+            color: #8b4513
+        }
+
+        .info-container {
+            display: flex;
+            gap: 30px;
+        }
+
+        .basic-info {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .info-list {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 12px;
+            font-size: 16px;
+        }
+
+        .info-list dt {
+            font-weight: bold;
+            text-align: right;
+            padding-right: 15px;
+            border-right: 1px solid rgba(212, 186, 91, 0.3);
+        }
+
+        .info-list dd {
+            margin-left: 0;
+            padding-left: 15px;
+        }
+
+        .detail-info {
+            flex: 2;
+            border-left: 1px solid rgba(212, 186, 91, 0.3);
+            padding-left: 30px;
+        }
+
+        .highlight {
+            color: #D69B00;
+            font-weight: bold;
+            margin: 15px 0 8px;
+        }
+
+        .comments {
+            margin-top: 25px;
+        }
+
+        .comment {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid rgba(212, 186, 91, 0.3);
+        }
+
+        .from {
+            color: #D69B00;
+            font-weight: bold;
+            display: block;
+            margin-top: 5px;
+            margin-bottom: -5px;
+            line-height: 1.2;
+        }
+        .image-position {
+            position: absolute;
+            bottom: 20px;
+            right: 0;
+            height: 150px;
+            width: auto;
+        }
+        @media (max-width: 768px) {
+            .info-container {
+                flex-direction: column;
+            }
+            .detail-info {
+                border-left: none;
+                padding-left: 0;
+                border-top: 1px solid rgba(212, 186, 91, 0.3);
+                padding-top: 20px;
+            }
+        }
+
+        .main-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+            padding-bottom: 5px;
+        }
+
+        .memory-fragments {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px auto;
+            width: 85%;
+            max-width: 1200px;
+            color: #d4ba5b;
+            box-shadow: 0 0 15px rgba(212, 186, 91, 0.3);
+            border: 1px solid rgba(212, 186, 91, 0.5);
+        }
+
+        .memory-fragments h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+            color: #8b4513;
+        }
+
+        .fragments-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .fragment-item {
+            flex: 0 1 calc(50% - 40px);
+            max-width: calc(50% - 40px);
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .fragment-item img {
+            max-width: 100%;
+            height: auto;
+            max-height: 320px;
+            display: block;
+            margin: 0 auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+            object-fit: contain;
+            background: white;
+            padding: 4px;
+        }
+
+        .fragment-item img:hover {
+            transform: scale(1.03);
+        }
+
+        .fragment-item p {
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: #d4ba5b;
+        }
+
+        .image-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .enlarged-img-container {
+            position: relative;
+            max-width: 80vw;
+            max-height: 80vh;
+        }
+
+        .enlarged-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .show-text-btn {
+            position: absolute;
+            bottom: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(212, 186, 91, 0.9);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1001;
+            transition: all 0.3s;
+        }
+
+        .show-text-btn:hover {
+            background: rgba(212, 186, 91, 1);
+            transform: translateX(-50%) scale(1.05);
+        }
+
+        .text-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1002;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .text-container {
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: white;
+            border: 1px solid rgba(212, 186, 91, 0.3);
+            box-shadow: 0 0 20px rgba(212, 186, 91, 0.2);
+        }
+
+        .text-container p {
+            white-space: pre-line;
+            line-height: 2;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .close-text-btn,.close-image-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(212, 186, 91, 0.8);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .text-container::-webkit-scrollbar,.quote-sections::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.text-container::-webkit-scrollbar-track,.quote-sections::-webkit-scrollbar-track{
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.text-container::-webkit-scrollbar-thumb,.quote-sections::-webkit-scrollbar-thumb {
+    background: rgba(212, 186, 91, 0.5);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.text-container::-webkit-scrollbar-thumb:hover,.quote-sections::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 186, 91, 0.7);
+}
+
+.custom-height-special {
+    height: 400px !important;
+    width: auto !important;
+    object-fit: contain !important;
+    max-height: none !important;
+}
+
+        .quote-sections {
+            display: flex;
+            gap: 30px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 1250px;
+        }
+
+        .quote-section {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            color: #d4ba5b;
+            box-shadow: 0 0 15px rgba(212, 186, 91, 0.3);
+            border: 1px solid rgba(212, 186, 91, 0.5);
+            box-sizing: border-box; 
+            position: relative;
+            height: 600px; /* 固定高度 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quote-section:first-child {
+            flex: 3;
+        }
+
+        .quote-section:last-child {
+            flex: 2;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed #d4ba5b;
+            padding-bottom: 10px;
+        }
+
+        .play-button {
+  background-image: url('picture/播放.png');
+  background-size: contain;
+            cursor: pointer;
+            vertical-align: middle;
+            width: 25px;
+            height: 25px;
+            background-color: transparent;
+            border: none;
+            margin-left:10px;
+        }
+
+        .quotes-list::-webkit-scrollbar,
+        .house-dialogues .dialogue-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .quotes-list::-webkit-scrollbar-track,
+        .house-dialogues .dialogue-content::-webkit-scrollbar-track {
+            background: rgba(212, 186, 91, 0.1);
+            border-radius: 3px;
+        }
+
+        .quotes-list::-webkit-scrollbar-thumb,
+        .house-dialogues .dialogue-content::-webkit-scrollbar-thumb {
+            background: rgba(212, 186, 91, 0.5);
+            border-radius: 3px;
+        }
+
+        .quotes-list {
+            display: grid;
+            grid-template-columns: 1fr 30px 2fr; /* 标题列、播放按钮列、正文列 */
+            row-gap: 20px;
+            align-items: center;
+            overflow-y: auto; /* 添加滚动条 */
+            flex: 1;
+        }
+
+        .quotes-list dt {
+            font-weight: bold;
+            text-align: right;
+            padding-right: 15px;
+            border-right: 2px solid rgba(212, 186, 91, 0.3);
+            align-self: center; 
+        }
+
+        .quotes-list dd {
+            margin-left: 0;
+            padding-left: 12px;
+            align-self: center; 
+        }
+
+        .house-dialogues {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .house-dialogues .dialogue-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .house-dialogues button {
+            padding: 6px 40px; 
+            font-size: 16px;
+            cursor: pointer;
+            border: 1px solid rgba(212, 186, 91, 0.5);
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #d4ba5b;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .house-dialogues button:hover {
+            background-color: rgba(212, 186, 91, 0.3);
+        }
+
+        .house-dialogues .dialogue-content {
+            display: none;
+            padding-left: 40px; 
+            overflow-y: auto; /* 添加滚动条 */
+            flex: 1;
+        }
+
+        .house-dialogues .dialogue-content.active {
+            display: block;
+        }
+
+        .house-dialogues .dialogue-content p {
+            margin: 20px 0; 
+        }
+
+        /* 添加图片样式 */
+        .house-dialogues img {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 100px; 
+            height: auto; 
+        }
+
+
+
+    </style>
+</head>
+<body>
+    <!-- 主内容区域，包含标题、添加和删除按钮、画廊和角色信息 -->
+    <div class="main-content">
+        <h1 class="site-title" style="text-align: center;">
+            <img src='picture/title.png' 
+                alt="PRINCE GALLERY" 
+                style="width: 300px; height: auto; display: inline-block;">
+        </h1>
+        <div class="add-button" id="addBtn"></div>
+        <div class="delete-button" id="deleteBtn"></div>
+        <div class="gallery-container">
+            <button class="nav-button left" id="prevBtn"></button>
+            <div class="gallery" id="gallery">
+                <!-- 立绘框将通过JavaScript动态生成 -->
+            </div>
+            <button class="nav-button right" id="nextBtn"></button>
+        </div>
+
+        <div class="character-info">
+            <h2 class="info-title">◆ 王子档案 ◆</h2>
+            <div class="info-container">
+                <div class="basic-info">
+                    <dl class="info-list">
+                        <dt>姓名</dt><dd>阿尔弗雷德</dd>
+                        <dt>年龄</dt><dd>38岁</dd>
+                        <dt>身高</dt><dd>188cm</dd>
+                        <dt>体重</dt><dd>75kg</dd>
+                        <dt>兴趣</dt><dd>品红酒</dd>
+                        <dt>癖好/习惯</dt><dd>摸胡子</dd>
+                        <dt>准则/方针</dt><dd>与人交往广泛且不深入</dd>
+                        <dt>喜欢</dt><dd>酒和游戏</dd>
+                        <dt>讨厌</dt><dd>无聊的事</dd>
+                    </dl>
+                    <img src="./picture/chara_s.png" alt="角色图片" class="image-position" onerror="this.style.display='none'">
+                </div>
+                <div class="detail-info">
+                    <div class="keywords">
+                        <h3 style="color: #B37D00;">◆ 关键词 ◆</h3>
+                        <p class="highlight">「红酒」</p>
+                        <p>作为红酒之国的王子，因此非常熟悉。与主人公一起喝的是名为「日晷」的红酒，包含了阿尔弗雷德的心意。</p>
+                        <p class="highlight">「玛洛格特」</p>
+                        <p>因病离世的阿尔弗雷德的妻子。是位金发的美丽女性，曾经和睦相爱。杰恩也出席了他们的婚礼。</p>
+                    </div>
+                    <div class="comments">
+                        <h3 style="color: #B37D00">◆ Seen from other prince ◆</h3>
+                        <p class="comment"><span class="from">from 马尔唐</span><br>
+                        "阿尔啊，再稍微识相一点就好了。如果没有谁从中协调，就不会找杰恩说话，我也不是天天都那么闲的哪！"</p>
+                        <p class="comment"><span class="from">from 杰恩</span><br>
+                        "我们是同一所寄宿学校的。不过……算了，聊这个话题会很郁闷。"已经没关系了"……没法好好传达这话的我，也还挺孩子气的。"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="memory-fragments">
+        <h2>◆ 相关记忆碎片 ◆</h2>
+        
+        <div class="fragments-container">
+            <div class="fragment-item">
+                <img src="记忆碎片/碎片1.jpg"
+                     data-text="暖色的灯光让洒吧的家具泛出琥珀色的光泽……
+                        阿尔弗雷德
+                        「这里的酒不错。可是生意却不怎么兴隆啊」
+                        马尔唐
+                        「哈哈，真严格啊。不过，夜晚才刚刚开始哦」
+                        阿尔弗雷德晃着酒杯调侃，马尔唐毫不介意地笑着回应。
+                        马尔唐今晚被经常去的酒吧的店主拜托看店。
+                        一开始并没有阿尔弗雷德以外的客人，但不久后，入口的门打开了……
+                        藤目
+                        「晚上好。真是个美妙的夜晚呢」
+                        影虎
+                        「有空位吗？」
+                        随着铃声出现的是藤目和影虎。
+                        马尔唐
+                        「请进。欢迎光临」
+                        在马尔唐引导下，两人在吧台前的高脚凳落座。
+                        藤目
+                        「我现在正在取材旅行的途中，听说这里有家白兰地之国的王子经常光顾的酒吧」
+                        马尔唐
+                        「那一定就是这家店了。我是梵布留的王子马尔唐。请多指教」
+                        在马尔唐先自我介绍之后，三位王子各自表明了自己的身份。
+                        阿尔弗雷德
+                        「哦，文坛之国的......藤目王子的作品，我也拜读过几部呢」
+                        马尔唐
+                        「这么有趣的相遇竟然诞生在这里。美酒是人生的栖木。希望你们今晚能玩得开心」
+                        四个人很快熟络起来，空瓶子越来越多。
+                        藤目
+                        「原来如此，马尔唐王子恋爱经验很丰富啊。长知识了」
+                        马尔唐
+                        「哪里哪里，饶了我吧。我都变得难为情了。而且，我现在可是一心一意对我的真命天女呢」
+                        藤目
+                        「哦，真命天女……真棒。是什么样的人呢？」
+                        影虎
+                        「……藤目，我知道你有一颗热衷研究的心，但还是适可而止吧」
+                        阿尔弗雷德
+                        「我听说文坛之国的王族中有很多作家……那么影虎王子涉足什么类型的作品呢？」
+                        影虎
+                        「不，我——」
+                        以马葛丽特为笔名创作绘本的影虎，一直隐瞒着身份进行创作活动
+                        正当影虎因为难以回答而皱眉时，门铃声宣告了新客人的到来。
+                        影虎
+                        「……」
+                        男性客人
+                        「对、对不起……打扰了！」
+                        客人慌张地关上门，一瞬间，沉默笼罩着店内。
+                        影虎
+                        「……刚刚那个客人，为什么要道款？」
+                        藤目
+                        「恐怕是被吓到了吧。毕竟影虎皱眉的样子很有威慑力」
+                        影虎
+                        「什……！白天我才吓到了路过的孩子……」
+                        见藤目毫无顾忌地指出，影虎泄气地垂下肩膀。
+                        阿尔弗雷德
+                        「别太在意。换句话说，你的长相很有威严呀」
+                        马尔唐
+                        「没错没错，不用消沉。对了，我请你喝我珍藏的白兰地吧」
+                        马尔唐打开一瓶有些年代的酒。美酒的醇香四散开来，王子们的夜晚还在继续……
+                        ">
+                <p>嗜好酒的男人</p>
+            </div>
+            <div class="fragment-item">
+                <img src="记忆碎片/碎片2.jpg"
+                     data-text="街灯映照的静谧小巷里，回荡着皮鞋的脚步声......
+                        阿尔弗雷德，杰恩，马尔唐……三位互为旧识的王子们，刚刚出席了一位共同友人的婚礼。
+                        马尔唐
+                        「真是场美好的婚礼。这样的夜晚总让人想喝两杯」
+                        阿尔弗雷德
+                        「你一直都是这样的吧？」
+                        杰恩
+                        「马尔唐从以前开始就没有怎么改变过呢」
+                        三人随意交谈着，气氛显得格外放松。
+                        马尔唐
+                        「这不是很好吗，好久没有三个人聚在一起了。所以呢，这附近有没有不错的酒吧？」
+                        马尔唐环视了一下周围。
+                        于是阿尔弗雷德向前走了一步，示意自己带路。
+                        阿尔弗雷德
+                        「我知道附近一家品质不错的店。去看看吧」
+                        马尔唐
+                        「要是有沙发就好了。今晚想要好好畅谈一番」
+                        杰恩
+                        「哈哈，拿婚礼的话题下酒吗？」
+                        阿尔弗雷德
+                        「说起来……以前也曾像这样，在婚礼结束后去喝酒呢」
+                        似乎在回忆遥远的过去，阿尔弗雷德托着下巴，眯起了眼睛。
+                        马尔唐
+                        「嗯，真怀念啊。当时杰恩被女孩子团团围住，脱不了身」
+                        阿尔弗雷德
+                        「说起那时的杰恩啊……明明一副什么都不在乎的样子，却也会冷不丁地和女孩打交道呢」
+                        杰恩
+                        「是这样吗……真亏你们还记得」
+                        马尔唐
+                        「那当然啊，那天晚上的事情想忘也忘不掉」
+                        阿尔弗雷德
+                        「是啊，那种情况很难得一见嘛。向杰恩搭讪的女孩的男友跑来大闹」
+                        马尔唐
+                        「多亏阿尔帮忙劝架。虽然最后，三个人都被禁止出入那家酒吧了」
+                        两人笑得晃起了肩膀，杰恩也忍不住苦笑起来。
+                        杰恩
+                        「我觉得很对不住你们。所以，差不多可以原谅我了吧」
+                        马尔唐
+                        「明白啦，那件事早就过去了」
+                        马尔唐的眼角漾起了笑意。他拍拍杰恩的后背。
+                        马尔唐
+                        「时间会解决一切……这话可能有些过于理想。但也会有这样的情况吧」
+                        马尔唐的话暗指杰恩和阿尔弗雷德两人的过去，让始终保持着微妙距离的两人不禁双肩一颤。
+                        杰恩
+                        「你想说什么……不过，问了也是我自讨没趣吧」
+                        马尔唐
+                        「我自己也觉得有些多管闲事。阿尔又如何呢？」
+                        听了马尔唐的问题，阿尔弗雷德看着前方，暂时地陷入了沉默。
+                        阿尔弗雷德
+                        「……有时间能够解决的问题，也有没那么容易解决的问题」
+                        阿尔弗雷德
+                        「只是，我也没有傻到会在喜庆的夜晚说些扫兴的话题」
+                        杰恩
+                        「阿尔……」
+                        阿尔弗雷德
+                        「今天开一瓶特别的洒吧。比如我们初识那年的红酒」
+                        马尔唐
+                        「不错，那敢情好」
+                        杰恩
+                        「嗯，感觉会是一个不错的夜晚」
+                        几位经历过酸甜苦辣的王子们欢谈的声音，在夜晚的街道响起……
+                        ">
+                <p>喜庆之夜的闲聊</p>
+            </div>
+            <div class="fragment-item">
+                <img src="记忆碎片/碎片3.jpg"
+                     data-text="冰果之国·阿玛雷纳……
+                        被拉托里亚邀请到他的别墅的人们……
+                        杰恩、影虎和阿尔弗雷德都在以各自的方式享受着泳池。 
+                        阿尔弗雷德
+                        「马尔唐还没到吗？」
+                        拉托里亚
+                        「好像是。虽然已经联络过了，他说正在赶来的路上……」
+                        两人在泳池边品尝着鸡尾酒，月色融入了酒杯之中。
+                        杰恩
+                        「算了，突然有公务也没办法。他一定会带一瓶最棒的白兰地来道款吧」
+                        影虎
+                        「哈哈，那可真让人期待。藤目那家伙要是能来就好了」
+                        拉托里亚
+                        「我听说了。他因为截稿日，现在还在闭关吧？」
+                        影虎
+                        「嗯。都怪他总是以取材为借口出去溜达，这是报应」
+                        一边想着藤目拼命赶稿的样子，他们一边安心等待着马尔唐，一副游刃有余的样子，不见半分匆忙。
+                        阿尔弗雷德
+                        「……和朋友一起度过的时光，果然很美好啊」
+                        影虎
+                        「我记得你们都是老相识了吧。我来这里插一脚，真的没关系吗？」
+                        拉托里亚
+                        「嗯，当然可以。朋友就是朋友，不论时间长久」
+                        杰恩
+                        「没错没错。到了这个年纪，交际圈就很难再扩大了。能这样结交新的朋友，是件喜事呢」
+                        影虎
+                        「这个我同意。不过一想到年龄，就有点感伤……」
+                        阿尔弗雷德
+                        「哈哈，不是约好不聊这个的吗」
+                        愉快的笑声乘着水边的凉风飘向远方。
+                        这时，服务员们前来收拾桌子上的空盘子，然后端上了色彩缤纷、精心装点的冰淇淋。
+                        阿尔弗雷德
+                        「哎呀，看起来和刚才品尝的不一样啊」
+                        拉托里亚
+                        「刚才的是新品，这些是阿玛雷纳现在流行的口味。我想让各位也品尝一下，所以特意准备了」
+                        这是拉托里亚今晚第四次端上冰淇淋了。
+                        从他一脸的好心情，大家都能看出他非常期待今天。
+                        拉托里亚
+                        「不用为年龄而伤感，来尝尝年轻人喜欢的口味吧！」
+                        除了拉托里亚之外，全员的肚子都已经冷透了，这时，影虎压低声音，向站在旁边的杰恩悄悄问道。
+                        影虎
+                        「……喂，平常就是这样的吗？」
+                        杰恩
+                        「嗯……这么没有节制还是挺少见的。这表示他今天格外开心吧……」
+                        阿尔弗雷德
+                        「……我差不多该进泳池游一游了。一直坐着，感觉都有点冷了」
+                        见阿尔弗雷德起身，杰恩立即举手。
+                        杰恩
+                        「那要不要跟我比一场？我来陪你吧」
+                        影虎
+                        「喂、喂？」
+                        拉托里亚
+                        「阿尔和杰恩要比赛啊，事情变得有趣起来了。影虎，你不如一边吃冰淇淋一边观战吧」
+                        看到拉托里亚对自己招手，影影虎望向杰恩和阿尔弗雷德。
+                        两人微微一笑，对影虎使了个眼色——『后面就拜托你了』。
+                        影虎
+                        「……马尔唐，你快点来啊」
+                        影虎一边坐下，一边接受作为亲密友人应受的洗礼。大人们享受的时刻，还远远未能结束……">
+                <p>大人们的游泳池畔</p>
+            </div>
+            <div class="fragment-item">
+                <img src="记忆碎片/碎片4.jpg"
+                    data-text="记录之国・莱科尔德举行了『变迁仪式』……
+                        仪式结束的当晚，梦世界的时间突然被停止……
+                        杰恩和阿尔弗雷德正要出发调查事件的原因。
+                        阿尔弗雷德
+                        「你真的也要一起去吗？虽说现在时间停止在了晚上……但原因还不明确，也有可能时间突然恢复，太阳出现的啊」
+                        阿尔弗雷德的话语，满是对杰恩的担忧——因某次事件成为半吸血鬼后，杰恩只能在夜间活动。
+                        杰恩
+                        「我知道阿尔想说什么。但是什么都不做，只是躲在城堡里也解决不了问题。反倒……」
+                        杰恩停下脚步，抬头看向夜空的月亮。
+                        杰恩
+                        「正因为现在时间停在了夜晚，有些事才应该交给我去做」
+                        说完，杰恩将目光转回阿尔弗雷德身上，看到对方还是一脸复杂的表情，他眨了一下眼睛。
+                        杰恩
+                        「如果照不到阳光，葡萄就没办法成长了，我和你一起品酒的乐趣不也没有了吗？」
+                        听到杰恩的话，阿尔弗雷德微微睁大了眼睛，随即轻轻地耸了耸肩。
+                        阿尔弗雷德
+                        「真是的……杰恩的改变，也是受到她的影响吧」
+                        杰恩
+                        「这一点阿尔也一样吧？」
+                        两人回忆起为了梦世界奋斗的公主。月光之下，有人缓缓靠近。
+                        诺克斯
+                        「嗨，好久不见。你们也来调查吗？」
+                        杰恩
+                        「希望能尽量找到一点线索。你也是吗？」
+                        听到这个问题，诺克斯静静点头，看向天空。
+                        诺克斯
+                        「虽然是个月明星稀的安静夜晚，但时间静止不动，真让人感到寂寞啊」
+                        诺克斯看着夜空，月光洒落在他苍白的肌肤上。
+                        诺克斯
+                        「没有风，星星也不会闪烁……看上去这个世界就好像已经死去了一样」
+                        阿尔弗雷德
+                        「死去了吗……或许也可以这么理解吧。这么一想，那个月亮也很寂寞吧」
+                        听着两人的对话，杰恩将目光从静止不动的月亮上移开。
+                        杰恩
+                        「……好了。公主殿下正在某处努力着，我们也别站着聊天了。既然要去调查，不如你也一起吧？」
+                        诺克斯
+                        「……我也一起？」
+                        阿尔弗雷德
+                        「是啊，独自一人待在这种地方，实在是太寂寞了」
+                        面对二人的邀约，诺克斯轻轻点头同意。
+                        诺克斯
+                        「和其他人在一起的时候，才能感觉到自己的时间仍在流动。谢谢。我们走吧……去把代表起始的早晨夺回来」
+                        三人相视而笑，朝着前方迈步。他们的眼眸中有着坚定的光……">
+                <p>为了找回明天</p>
+            </div>
+            <div class="fragment-item">
+                <img src="记忆碎片/碎片5.jpg" class="custom-height-special"
+                     data-text="「我，红酒之国·多米尼亚的王子，阿尔弗雷德，在此立誓」
+                        「我将和你一起传播多米尼亚红酒洒的魅力，充实全世界人们的心灵」
+                        「而滋润了我内心的人，是你。若是与你一起，愿望也一定能实现……我如此深信着」
+                     ">
+                <p>梦之誓约</p>
+            </div>
+            <div class="fragment-item">
+                <img src="记忆碎片/6.jpg" class="custom-height-special">
+                <p>现在是，今后也是</p>
+            </div>
+        </div>
+    </div>>
+
+    <div class="image-overlay" id="imageOverlay">
+        <button class="close-image-btn" id="closeImageBtn">×</button>
+        <div class="enlarged-img-container">
+            <img id="enlargedImage" class="enlarged-img" src="" alt="放大图片">
+            <button class="show-text-btn" id="showTextBtn">查看故事</button>
+        </div>
+    </div>
+
+    <div class="text-overlay" id="textOverlay">
+        <button class="close-text-btn" id="closeTextBtn">×</button>
+        <div class="text-container">
+            <p id="textContent"></p>
+        </div>
+    </div>
+        <div class="quote-sections">
+            <div class="quote-section">
+                <h3 class="section-title">杂七杂八文本集</h3>
+                <dl class="quotes-list">
+                    <dt>每日任务界面</dt>
+                    <dd></dd>
+                    <dd>「你很努力啊。结束之后，一起来喝点红酒吧？」</dd>
+                    <dt>生日</dt>
+                    <button class="play-button" onclick="playAudio('audio/他的生日.wav')"></button>
+                    <dd>「能听到你纯真的祝福，年龄增长感觉也挺不错的，今晚开一瓶特别的红酒吧」</dd>
+                    <dt>某一年的圣诞节登录</dt>
+                    <dd></dd>
+                    <dd>「很开心能跟你一起度过这么特别的一天，能看到你的笑容，对我来说就是最棒的礼物了」</dd>
+                    <dt>六周年登录</dt>
+                    <dd></dd>
+                    <dd>「如果你感到不安的话，我想为你驱散心中的阴霾。因为可爱的笑容才最适合你」</dd>
+                    <dt>七周年登录</dt>
+                    <button class="play-button" onclick="playAudio('./audio/七周年登录.wav')"></button>
+                    <dd>「因为有你在，我才能走出一个人的寂寞。谢谢……」</dd>
+                    <dt>王子总选举(深爱玫瑰)</dt>
+                    <dd></dd>
+                    <dd>「谢谢……今晚就以红酒碰杯吧。身旁有你……我已经别无所望了」</dd>
+                    <dt>加载界面</dt>
+                    <dd></dd>
+                    <dd>从容的成年人，阿尔弗雷德王子。除了一个人，没有真心地爱过其他人</dd>
+                </dl>
+            </div>
+            <div class="quote-section">
+                <h3 class="section-title">小屋台词</h3>
+                <div class="house-dialogues">
+                    <div class="dialogue-buttons">
+                        <button id="clickButton" onclick="showContent('click')">点击</button>
+                        <button id="freeButton" onclick="showContent('free')">自由</button>
+                    </div>
+                    <div id="clickContent" class="dialogue-content active">
+                        <p>想吓我一跳吗?</p>
+                        <p>想看我散开头发的样子?</p>
+                        <p>和你一起完全不会无聊呢</p>
+                        <p>我路过一家酒吧,在那里偶然遇到了杰恩。就不知不觉起劲地聊了起来</p>
+                        <p>既然你要陪我,那我就去拿瓶葡萄酒吧。我收藏了特别好的葡萄酒</p>
+                        <p>觉得无聊的话,就玩桌游吧。可以选择你喜欢的游戏</p>
+                        <p>你会允许我碰触你吗?</p>
+                        <p>你想外出的话,我也一起去</p>
+                        <p>吓我一跳</p>
+                        <p>感觉如何?不可以勉强自己哦</p>
+                        <p>我饿了。去吃饭吧?</p>
+                    </div>
+                    <div id="freeContent" class="dialogue-content">
+                        <p>这手杖是专门定制的</p>
+                        <p>耳朵是尖的？因为我是半吸血鬼</p>
+                        <p>可以借用你一些时间吗？我想要你陪我聊一会儿</p>
+                        <p>只要活得久了，就会遇到各种各样的事</p>
+                        <p>红酒会随着年份儿变得更加醇厚……我也想变成那样</p>
+                        <p>想和我商量吗？不嫌弃的话就说来听听吧</p>
+                        <p>仪容修饰我一直很讲究</p>
+                        <p>你平时喜欢什么样的书？我想读读看你喜欢的书</p>
+                        <p>在露台上悠闲地欣赏风景感觉也不赖</p>
+                        <p>我喜欢红酒，也喜欢玩乐……意外吗？</p>
+                        <p></p>
+                    </div>
+                    <img src="./picture/chara_s.png" alt="角色图片" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gallery = document.getElementById('gallery');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const addBtn = document.getElementById('addBtn');
+            const deleteBtn = document.getElementById('deleteBtn');
+            
+            // 定义角色数据，包括ID、图片路径、名称和是否为原始角色
+            let characters = [
+                { id: 1, img: '汇总页立绘/立绘1.png', name: '普版', isOriginal: true },
+                { id: 2, img: '汇总页立绘/立绘2.png', name: '1sp', isOriginal: true },
+                { id: 4, img: '汇总页立绘/立绘4.png', name: '3sp', link: './详情页示例-日月觉/语音界面v2.5.html', isOriginal: true },
+                { id: 5, img: '汇总页立绘/立绘5.png', name: '4sp', isOriginal: true },
+                { id: 6, img: '汇总页立绘/立绘6.png', name: '5sp', link: './详情页示例-星觉/语音界面v2.5.html', isOriginal: true },
+                { id: 7, img: '汇总页立绘/立绘7.png', name: '6sp', link: './详情页示例-皮肤与十周年ver/语音界面v2.5.html', isOriginal: true }
+            ];
+
+            let currentCenterIndex = 0;
+            let modal, deleteModal;
+
+            function createModals() {
+                modal = document.createElement('div');
+                modal.className = 'modal';
+                modal.innerHTML = `
+                    <div class="modal-content">
+                        <h3>新增角色立绘</h3>
+                        <input type="number" id="charId" placeholder="角色ID (必填)" min="1">
+                        <input type="text" id="charName" placeholder="活动名称">
+                        <input type="text" id="imagePath" placeholder="立绘路径 例：立绘7.png">
+                        <input type="text" id="charLink" placeholder="跳转链接 例：./子目录/页面.html">
+                        <div class="modal-buttons">
+                            <button class="cancel">取消</button>
+                            <button class="confirm">确认添加</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                deleteModal = document.createElement('div');
+                deleteModal.className = 'modal';
+                deleteModal.id = 'deleteModal';
+                deleteModal.innerHTML = `
+                    <div class="modal-content">
+                        <h3>删除自定义角色</h3>
+                        <div id="deleteList" style="max-height: 300px; overflow-y: auto;"></div>
+                        <div class="modal-buttons">
+                            <button class="close-btn">关闭</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(deleteModal);
+
+                const constructionModal = document.createElement('div');
+                constructionModal.className = 'construction-modal';
+                constructionModal.textContent = '🚧 施工中 🚧';
+                document.body.appendChild(constructionModal);
+            }
+
+            function bindEvents() {
+                addBtn.addEventListener('click', () => {
+                    modal.querySelector('#charId').value = '';
+                    modal.querySelector('#charName').value = '';
+                    modal.querySelector('#imagePath').value = '';
+                    modal.querySelector('#charLink').value = '';
+                    modal.style.display = 'block';
+                });
+
+                deleteBtn.addEventListener('click', () => {
+                    const customChars = characters.filter(c => !c.isOriginal);
+                    if (customChars.length === 0) {
+                        alert('暂无自定义角色可删除');
+                        return;
+                    }
+                    const deleteList = deleteModal.querySelector('#deleteList');
+                    deleteList.innerHTML = customChars.map(char => `
+                        <div class="delete-item">
+                            <span>ID: ${char.id}</span>
+                            <span>活动名称: ${char.name}</span>
+                            <button data-id="${char.id}" class="delete-btn">删除</button>
+                        </div>
+                    `).join('');
+                    deleteModal.style.display = 'block';
+                });
+
+                document.body.addEventListener('click', (e) => {
+                    if (e.target.closest('.modal .confirm')) {
+                        confirmAdd();
+                    }
+                    if (e.target.closest('.cancel, .close-btn')) {
+                        modal.style.display = 'none';
+                        deleteModal.style.display = 'none';
+                    }
+                    if (e.target.closest('.delete-btn')) {
+                        const id = parseInt(e.target.dataset.id);
+                        handleDelete(id);
+                    }
+                });
+            }
+
+            function loadCustomCharacters() {
+                try {
+                    const saved = localStorage.getItem('customCharacters');
+                    if (saved) {
+                        const customChars = JSON.parse(saved);
+                        characters = [
+                            ...characters.filter(c => c.isOriginal),
+                            ...customChars
+                        ].sort((a, b) => a.id - b.id);
+                        characters = characters.filter((v, i, a) => 
+                            a.findIndex(t => t.id === v.id) === i
+                        );
+                    }
+                } catch (e) {
+                    console.error('加载自定义角色失败:', e);
+                }
+            }
+
+            function initGallery() {
+
+                gallery.innerHTML = '';
+                const indexes = [
+                    (currentCenterIndex - 1 + characters.length) % characters.length,
+                    currentCenterIndex,
+                    (currentCenterIndex + 1) % characters.length
+                ];
+
+                indexes.forEach((charIndex, i) => {
+                    const char = characters[charIndex];
+                    const frame = document.createElement('div');
+                    frame.className = `frame ${i === 1 ? 'center' : ''}`;
+                    
+                    const img = new Image();
+                    img.src = char.img;
+                    img.alt = char.name;
+                    img.onerror = () => {
+                        img.src = 'picture/placeholder.png';
+                        console.error('图片加载失败:', char.img);
+                    };
+
+                    const link = document.createElement('a');
+                    link.className = 'character-link';
+                    link.href = char.link || '#';
+                    link.innerHTML = `<span hidden>${char.name}</span>`;
+
+                    if (!char.link) {
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            showConstructionModal();
+                        });
+                    }
+
+                    frame.appendChild(img);
+                    frame.appendChild(link);
+                    gallery.appendChild(frame);
+                });
+            }
+
+            window.confirmAdd = function() {
+                const charId = parseInt(modal.querySelector('#charId').value);
+                const charName = modal.querySelector('#charName').value.trim();
+                const imagePath = modal.querySelector('#imagePath').value.trim();
+                const charLink = modal.querySelector('#charLink').value.trim();
+
+                characters = characters.filter(c => c.id !== charId);
+                characters.push({
+                    id: charId,
+                    img: `汇总页立绘/${imagePath}`,
+                    name: charName,
+                    link: charLink || undefined,
+                    isOriginal: false
+                });
+                characters.sort((a, b) => a.id - b.id);
+
+                localStorage.setItem('customCharacters', 
+                    JSON.stringify(characters.filter(c => !c.isOriginal))
+                );
+                currentCenterIndex = characters.findIndex(c => c.id === charId);
+                initGallery();
+                modal.style.display = 'none';
+            };
+
+            window.handleDelete = function(id) {
+                if (!confirm(`确定删除ID ${id} 的角色？`)) return;
+                characters = characters.filter(c => c.id !== id);
+                localStorage.setItem('customCharacters',
+                    JSON.stringify(characters.filter(c => !c.isOriginal))
+                );
+                currentCenterIndex = Math.min(currentCenterIndex, characters.length - 1);
+                initGallery();
+                deleteModal.style.display = 'none';
+            };
+
+            createModals();
+            loadCustomCharacters();
+            bindEvents();
+            initGallery();
+
+            prevBtn.addEventListener('click', () => {
+                currentCenterIndex = (currentCenterIndex - 1 + characters.length) % characters.length;
+                initGallery();
+            });
+
+            nextBtn.addEventListener('click', () => {
+                currentCenterIndex = (currentCenterIndex + 1) % characters.length;
+                initGallery();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') prevBtn.click();
+                if (e.key === 'ArrowRight') nextBtn.click();
+            });
+        });
+
+        function showConstructionModal() {
+            const modal = document.querySelector('.construction-modal');
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 1500);
+        }
+
+
+        let currentImageData = null;
+
+        function initGallery() {
+            document.getElementById('closeImageBtn').addEventListener('click', function() {
+            hideImageOverlay();
+            });
+            document.querySelectorAll('.fragment-item img').forEach(img => {
+                img.addEventListener('click', function() {
+                    showImageOverlay(this);
+                });
+            });
+
+            document.getElementById('showTextBtn').addEventListener('click', function(e) {
+                showTextOverlay();
+                e.stopPropagation();
+            });
+
+            document.getElementById('closeTextBtn').addEventListener('click', function() {
+                hideTextOverlay();
+            });
+
+            document.getElementById('textOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideTextOverlay();
+                }
+            });
+
+            document.getElementById('imageOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    hideImageOverlay();
+                }
+            });
+        }
+
+        function showImageOverlay(imgElement) {
+            currentImageData = {
+                src: imgElement.src,
+                text: imgElement.getAttribute('data-text') || "暂无相关故事内容"
+            };
+
+            const enlargedImg = document.getElementById('enlargedImage');
+            enlargedImg.src = currentImageData.src;
+            
+            document.getElementById('imageOverlay').style.display = 'flex';
+        }
+
+        function hideImageOverlay() {
+            document.getElementById('imageOverlay').style.display = 'none';
+        }
+
+        function showTextOverlay() {
+            document.getElementById('textContent').textContent = currentImageData.text;
+            document.getElementById('textOverlay').style.display = 'flex';
+        }
+
+        function hideTextOverlay() {
+            document.getElementById('textOverlay').style.display = 'none';
+        }
+
+        window.addEventListener('DOMContentLoaded', initGallery);
+
+        function playAudio(audioFile) {
+            const audio = new Audio(audioFile);
+            audio.play().catch(e => {
+                console.error('播放音频失败:', e);
+                alert('无法播放音频文件');
+            });
+        }
+
+        function showContent(contentType) {
+            const clickContent = document.getElementById('clickContent');
+            const freeContent = document.getElementById('freeContent');
+
+            if (contentType === 'click') {
+                clickContent.classList.add('active');
+                freeContent.classList.remove('active');
+            } else if (contentType === 'free') {
+                freeContent.classList.add('active');
+                clickContent.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>

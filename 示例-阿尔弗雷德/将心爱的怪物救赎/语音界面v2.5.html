@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>语音界面</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <a href="../汇总页v2.0.html" class="return-btn">
+        <img src="../picture/返回.png" alt="返回按钮">
+    </a>
+    
+    <div class="main-container">
+        <div class="container">
+            <div class="left-panel">
+                <div class="character-art-container">
+                    <button id="zoomBtn" class="zoom-btn" style="background-image: url('../picture/放大.png')"></button>
+                    <button id="prevExpressionBtn" class="expression-nav-btn prev-btn" style="background-image: url('../picture/上.png')"></button>
+                    <button id="nextExpressionBtn" class="expression-nav-btn next-btn" style="background-image: url('../picture/下.png')"></button>
+                    <canvas id="characterArt" width="1204" height="2378" class="character-art"></canvas>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <h1>阿尔弗雷德</h1>
+                <h2>Alfred</h2>
+                <div class="subtitle">将心爱的怪物救赎</div>
+                <div class="subtitle english-text">CV:横田纮一</div>
+                
+                <div class="profile-container">
+                    <div class="profile-border profile-border-top"></div>
+                    <div class="profile-content">
+                        <div class="profile-title">档案</div>
+                        <div class="profile-text">
+                            红酒之国・多米尼亚的王子。常见娱乐基本都体验过的从容不迫的大人。父亲是吸血鬼，母亲是人类。收到诺卜利的邀请，准备和你一起参加「平透式」。在祈求和平与安宁的典礼中，他似乎想起了什么。
+                        </div>
+                    </div>
+                    <div class="profile-border profile-border-bottom"></div>
+                </div>
+                
+                <div class="awaken-btns">
+                    <button class="awaken-btn on" data-type="pre"><span>觉醒前</span></button>
+                    <button class="awaken-btn off" data-type="sun"><span>日觉</span></button>
+                    <button class="awaken-btn off" data-type="moon"><span>月觉</span></button>
+                </div>
+                
+                <div class="voice-list" id="voiceList"></div>
+            </div>
+        </div>
+        
+        <div class="cg-container">
+            <div class="cg-gallery">
+                <div class="cg-item">
+                    <img src="./cg/pre.jpg" class="cg-image">
+                    <div class="cg-caption">觉醒前</div>
+                </div>
+                <div class="cg-item">
+                    <img src="./cg/sun.jpg" class="cg-image">
+                    <div class="cg-caption">日觉</div>
+                </div>
+                <div class="cg-item">
+                    <img src="./cg/moon.jpg" class="cg-image">
+                    <div class="cg-caption">月觉</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <img src="../picture/小彩蛋.gif" alt="小彩蛋" class="gif-sticker" onerror="this.style.display='none'">
+    
+    <script src="../character-voice-ui.js"></script>
+    <!-- <script src="../head-offset-debug.js"></script> -->
+    <script>
+        // 语音文本内容
+        const voiceData = {
+            pre: [
+                "早上好。醒来感觉如何?今天是祈祷和平的仪式,我们就以平静的心情参加吧",
+                "我们一起去参观一下平透式的会场吧,可以让我来护送你吗?",
+                "与你一起度过的夜晚总是感觉很安心……我可以再在你的身旁待一会儿吗?",
+                "平透式是为了祈祷和平而设的仪式……让我们共同祈祷吧,愿大家能够获得安宁",
+                "会场似乎有些骚动。虽然不清楚发生了什么,但请不要离开我的身边",
+                "能够和你一起参加平透式,我很开心。如果是独自一人的话……我可能会想得太多",
+                "在祈祷和平的会场喧哗,实在有失体统啊",
+                "这样是不是多少反省一些了?",
+                "哈！",
+                "麻烦了……",
+                "你的祈祷,已经传达到了哦",
+                "我不允许有扰乱和平的存在出现",
+                "我对自己的实力很有信心,不如就在这里展示一下吧",
+                "好了,接下来会在哪里出现骚乱呢?",
+                "这样一来,应该就可以安静地举行平透式了",
+                "平透式的会场神圣而美丽,能够和你一同见证,真是太好了",
+                "只要有着对你的爱,我就确信自己还能够继续改变",
+                "平透式期间护送你的任务,可以放心交给我吗",
+                "不用担心,我会在你身旁支持你的",
+                "你对和平的祈祷也传达给了我",
+                "啊,你……果然很耀眼啊"
+            ],
+            sun: [
+                "如果是为了你,我愿意动用吸血鬼的力量,这就是我的觉悟",
+                "呵呵,看我看得入迷了吗?我作为王子,对自己的实力还是有些自信的",
+                "正是因为明白失去的可怕……所以我才想,一定要守护好我深爱着的你",
+                "如果我的力量能够帮到你……我会不惜余力的",
+                "如果是为了保护你,我不会厌烦战斗……我来做你的对手吧"
+            ],
+            moon: [
+                "就像你深爱着身为怪物的我一样,无论你变成什么样子,我都会深爱着你",
+                "不需要其他任何人,只要你愿意相信我……我就可以相信我自己",
+                "你的笑容是如此耀眼、惹人怜爱……你能够对我露出笑容,我感到非常高兴",
+                "如果是为了你,不管什么事情我都可以做到",
+                "我是一半为吸血鬼的怪物,然而你却愿意爱着这样的我。所以……"
+            ]
+        };
+
+        // 音频文件存放路径
+        const audioMap = {
+            pre: [
+                'audio/pre/问候-早晨.wav',
+                'audio/pre/问候-下午.wav',
+                'audio/pre/问候-晚上.wav',
+                'audio/pre/打招呼_1.wav',
+                'audio/pre/打招呼_2.wav',
+                'audio/pre/详情.wav',
+                'audio/pre/战斗开始.wav',
+                'audio/pre/得分.wav',
+                'audio/pre/攻击.wav',
+                'audio/pre/受到的伤害.wav',
+                'audio/pre/回复.wav',
+                'audio/pre/战斗技能发动.wav',
+                'audio/pre/fever开始.wav',
+                'audio/pre/食梦兽的回合结束.wav',
+                'audio/pre/任务完成.wav',
+                'audio/pre/王子界面.wav',
+                'audio/pre/训练.wav',
+                'audio/pre/战斗成员编成.wav',
+                'audio/pre/nice.wav',
+                'audio/pre/great.wav',
+                'audio/pre/excellent.wav',
+                'audio/pre/生日.wav',
+                'audio/pre/登录界面.wav'
+            ],
+            sun: [
+                'audio/sun/打招呼_1.wav',
+                'audio/sun/打招呼_2.wav',
+                'audio/sun/详情.wav',
+                'audio/sun/战斗技能发动.wav',
+                'audio/sun/觉醒.wav'
+            ],
+            moon: [
+                'audio/moon/打招呼_1.wav',
+                'audio/moon/打招呼_2.wav',
+                'audio/moon/详情.wav',
+                'audio/moon/战斗技能发动.wav',
+                'audio/moon/觉醒.wav'
+            ]
+        };
+
+        // 各语音的标签名称（显示在界面上）
+        const voiceLabels = {
+            pre: [
+                '问候 - 早晨',
+                '问候 - 下午',
+                '问候 - 晚上',
+                '打招呼',
+                '打招呼',
+                '详情',
+                '战斗开始',
+                '得分',
+                '攻击',
+                '受到的伤害',
+                '回复',
+                '战斗技能发动',
+                'fever开始',
+                '食梦兽的回合结束',
+                '任务完成',
+                '王子界面',
+                '训练',
+                '战斗成员编成',
+                'Nice',
+                'Great',
+                'Excellent',
+                '生日',
+                '登录界面'
+            ],
+            sun: [
+                '打招呼',
+                '打招呼',
+                '详情',
+                '战斗技能发动',
+                '觉醒'
+            ],
+            moon: [
+                '打招呼',
+                '打招呼',
+                '详情',
+                '战斗技能发动',
+                '觉醒'
+            ]
+        };
+
+        // 图片资源存放路径
+        const imageMap = {
+            pre: { body: './picture/pri_01136_sps.png', head: './picture/pri_01136_sps_all.png' },
+            sun: { body: 'picture/pri_11136_sps.png', head: 'picture/pri_11136_sps_all.png' },
+            moon: { body: 'picture/pri_21136_sps.png', head: 'picture/pri_21136_sps_all.png' }
+        };
+
+        // 全身立绘图信息（位置、尺寸等）- 使用简化格式
+        const bodyFrames = {
+            pre: {
+                spriteOffset: "{0,251}",
+                spriteSize: "{1202,2374}",
+                textureRect: "{1,1},{1202,2374}",
+            },
+            sun: {
+                spriteOffset: "{-36,141}",
+                spriteSize: "{2092,2260}",
+                textureRect: "{1,1},{2092,2260}",
+            },
+            moon: {
+                spriteOffset: "{-220,-36}",
+                spriteSize: "{1946,2524}",
+                textureRect: "{1,1},{1946,2524}",
+            }
+        };
+
+        // 表情的偏移量 - 使用简化格式
+        const headOffsets = {
+            pre: "{-9,786}",
+            sun: "{-35,792}",
+            moon: "{-24,788}"
+        };
+        
+        // 表情信息（各种表情的位置、尺寸等）- 使用新的简化格式
+        const headFrames = {
+            pre: {
+            "face_01136_01.png": "{1,1},{258,294}",
+            "face_01136_01_blink.png": "{1,297},{258,294}",
+            "face_01136_02.png": "{1,1},{258,294}",
+            "face_01136_02_blink.png": "{1,297},{258,294}",
+            "face_01136_03.png": "{1,593},{258,294}",
+            "face_01136_03_blink.png": "{1,889},{258,294}",
+            "face_01136_04.png": "{1,1185},{258,294}",
+            "face_01136_04_blink.png": "{1,1481},{258,294}",
+            "face_01136_05.png": "{261,1},{258,294}",
+            "face_01136_05_blink.png": "{521,1},{258,294}",
+            "face_01136_06.png": "{781,1},{258,294}",
+            "face_01136_06_blink.png": "{1041,1},{258,294}",
+            "face_01136_07.png": "{1301,1},{258,294}",
+            "face_01136_07_blink.png": "{1561,1},{258,294}",
+            "face_01136_08.png": "{261,297},{258,294}",
+            "face_01136_08_blink.png": "{261,593},{258,294}",
+            "face_01136_09.png": "{261,889},{258,294}",
+            "face_01136_09_blink.png": "{261,1185},{258,294}",
+            "face_01136_10.png": "{261,1481},{258,294}",
+            "face_01136_10_blink.png": "{521,297},{258,294}",
+            "face_01136_11.png": "{781,297},{258,294}",
+            "face_01136_11_blink.png": "{1041,297},{258,294}",
+            "face_01136_12.png": "{1301,297},{258,294}",
+            "face_01136_12_blink.png": "{1561,297},{258,294}",
+            "face_01136_13.png": "{521,593},{258,294}",
+            "face_01136_13_blink.png": "{521,889},{258,294}",
+            "face_01136_14.png": "{521,1185},{258,294}",
+            "face_01136_14_blink.png": "{521,1481},{258,294}",
+            "face_01136_15.png": "{1,297},{258,294}",
+            "face_01136_15_blink.png": "{1,297},{258,294}",
+            "face_01136_16.png": "{1,889},{258,294}",
+            "face_01136_16_blink.png": "{1,889},{258,294}",
+            "face_01136_17.png": "{1,1481},{258,294}",
+            "face_01136_17_blink.png": "{1,1481},{258,294}",
+            "face_01136_18.png": "{521,1},{258,294}",
+            "face_01136_18_blink.png": "{521,1},{258,294}",
+            "face_01136_19.png": "{1041,1},{258,294}",
+            "face_01136_19_blink.png": "{1041,1},{258,294}",
+            "face_01136_20.png": "{1561,1},{258,294}",
+            "face_01136_20_blink.png": "{1561,1},{258,294}",
+            "face_01136_21.png": "{261,593},{258,294}",
+            "face_01136_21_blink.png": "{261,593},{258,294}",
+            "face_01136_22.png": "{261,1185},{258,294}",
+            "face_01136_22_blink.png": "{261,1185},{258,294}",
+            "face_01136_23.png": "{521,297},{258,294}",
+            "face_01136_23_blink.png": "{521,297},{258,294}",
+            "face_01136_24.png": "{1041,297},{258,294}",
+            "face_01136_24_blink.png": "{1041,297},{258,294}",
+            "face_01136_25.png": "{1561,297},{258,294}",
+            "face_01136_25_blink.png": "{1561,297},{258,294}",
+            "face_01136_26.png": "{521,889},{258,294}",
+            "face_01136_26_blink.png": "{521,889},{258,294}",
+            "face_01136_27.png": "{521,1481},{258,294}",
+            "face_01136_27_blink.png": "{521,1481},{258,294}"
+            },
+            sun: {
+            "face_11136_01.png": "{1,1},{268,322}",
+            "face_11136_01_blink.png": "{271,1},{268,322}",
+            "face_11136_02.png": "{1,1},{268,322}",
+            "face_11136_02_blink.png": "{271,1},{268,322}",
+            "face_11136_03.png": "{541,1},{268,322}",
+            "face_11136_03_blink.png": "{1,325},{268,322}",
+            "face_11136_04.png": "{271,325},{268,322}",
+            "face_11136_04_blink.png": "{271,325},{268,322}",
+            "face_11136_05.png": "{541,325},{268,322}",
+            "face_11136_05_blink.png": "{1,649},{268,322}",
+            "face_11136_06.png": "{271,649},{268,322}",
+            "face_11136_06_blink.png": "{541,649},{268,322}",
+            "face_11136_07.png": "{1,973},{268,322}",
+            "face_11136_07_blink.png": "{1,973},{268,322}",
+            "face_11136_08.png": "{271,1},{268,322}",
+            "face_11136_08_blink.png": "{271,1},{268,322}",
+            "face_11136_09.png": "{1,325},{268,322}",
+            "face_11136_09_blink.png": "{1,325},{268,322}",
+            "face_11136_10.png": "{271,325},{268,322}",
+            "face_11136_10_blink.png": "{271,325},{268,322}",
+            "face_11136_11.png": "{1,649},{268,322}",
+            "face_11136_11_blink.png": "{1,649},{268,322}",
+            "face_11136_12.png": "{541,649},{268,322}",
+            "face_11136_12_blink.png": "{541,649},{268,322}",
+            "face_11136_13.png": "{1,973},{268,322}",
+            "face_11136_13_blink.png": "{1,973},{268,322}"
+            },
+            moon: {
+            "face_21136_01.png": "{1,1},{266,308}",
+            "face_21136_01_blink.png": "{269,1},{266,308}",
+            "face_21136_02.png": "{1,1},{266,308}",
+            "face_21136_02_blink.png": "{269,1},{266,308}",
+            "face_21136_03.png": "{537,1},{266,308}",
+            "face_21136_03_blink.png": "{537,1},{266,308}",
+            "face_21136_04.png": "{1,311},{266,308}",
+            "face_21136_04_blink.png": "{269,311},{266,308}",
+            "face_21136_05.png": "{537,311},{266,308}",
+            "face_21136_05_blink.png": "{1,621},{266,308}",
+            "face_21136_06.png": "{269,621},{266,308}",
+            "face_21136_06_blink.png": "{269,621},{266,308}",
+            "face_21136_07.png": "{537,621},{266,308}",
+            "face_21136_07_blink.png": "{1,931},{266,308}",
+            "face_21136_08.png": "{269,1},{266,308}",
+            "face_21136_08_blink.png": "{269,1},{266,308}",
+            "face_21136_09.png": "{537,1},{266,308}",
+            "face_21136_09_blink.png": "{537,1},{266,308}",
+            "face_21136_10.png": "{269,311},{266,308}",
+            "face_21136_10_blink.png": "{269,311},{266,308}",
+            "face_21136_11.png": "{1,621},{266,308}",
+            "face_21136_11_blink.png": "{1,621},{266,308}",
+            "face_21136_12.png": "{269,621},{266,308}",
+            "face_21136_12_blink.png": "{269,621},{266,308}",
+            "face_21136_13.png": "{1,931},{266,308}",
+            "face_21136_13_blink.png": "{1,931},{266,308}"
+            }
+        };
+
+        // 表情与眨眼表情的映射关系
+        const blinkMap = {
+            pre: {
+                "face_01136_01.png": "face_01136_01_blink.png",
+                "face_01136_02.png": "face_01136_02_blink.png",
+                "face_01136_03.png": "face_01136_03_blink.png",
+                "face_01136_04.png": "face_01136_04_blink.png",
+                "face_01136_05.png": "face_01136_05_blink.png",
+                "face_01136_06.png": "face_01136_06_blink.png",
+                "face_01136_07.png": "face_01136_07_blink.png",
+                "face_01136_08.png": "face_01136_08_blink.png",
+                "face_01136_09.png": "face_01136_09_blink.png",
+                "face_01136_10.png": "face_01136_10_blink.png",
+                "face_01136_11.png": "face_01136_11_blink.png",
+                "face_01136_12.png": "face_01136_12_blink.png",
+                "face_01136_13.png": "face_01136_13_blink.png",
+                "face_01136_14.png": "face_01136_14_blink.png",
+                "face_01136_15.png": "face_01136_15_blink.png",
+                "face_01136_16.png": "face_01136_16_blink.png",
+                "face_01136_17.png": "face_01136_17_blink.png",
+                "face_01136_18.png": "face_01136_18_blink.png",
+                "face_01136_19.png": "face_01136_19_blink.png",
+                "face_01136_20.png": "face_01136_20_blink.png",
+                "face_01136_21.png": "face_01136_21_blink.png",
+                "face_01136_22.png": "face_01136_22_blink.png",
+                "face_01136_23.png": "face_01136_23_blink.png",
+                "face_01136_24.png": "face_01136_24_blink.png",
+                "face_01136_25.png": "face_01136_25_blink.png",
+                "face_01136_26.png": "face_01136_26_blink.png",
+                "face_01136_27.png": "face_01136_27_blink.png"
+            },
+            sun: {
+                "face_11136_01.png": "face_11136_01_blink.png",
+                "face_11136_02.png": "face_11136_02_blink.png",
+                "face_11136_03.png": "face_11136_03_blink.png",
+                "face_11136_04.png": "face_11136_04_blink.png",
+                "face_11136_05.png": "face_11136_05_blink.png",
+                "face_11136_06.png": "face_11136_06_blink.png",
+                "face_11136_07.png": "face_11136_07_blink.png",
+                "face_11136_08.png": "face_11136_08_blink.png",
+                "face_11136_09.png": "face_11136_09_blink.png",
+                "face_11136_10.png": "face_11136_10_blink.png",
+                "face_11136_11.png": "face_11136_11_blink.png",
+                "face_11136_12.png": "face_11136_12_blink.png",
+                "face_11136_13.png": "face_11136_13_blink.png"
+            },
+            moon: {
+                "face_21136_01.png": "face_21136_01_blink.png",
+                "face_21136_02.png": "face_21136_02_blink.png",
+                "face_21136_03.png": "face_21136_03_blink.png",
+                "face_21136_04.png": "face_21136_04_blink.png",
+                "face_21136_05.png": "face_21136_05_blink.png",
+                "face_21136_06.png": "face_21136_06_blink.png",
+                "face_21136_07.png": "face_21136_07_blink.png",
+                "face_21136_08.png": "face_21136_08_blink.png",
+                "face_21136_09.png": "face_21136_09_blink.png",
+                "face_21136_10.png": "face_21136_10_blink.png",
+                "face_21136_11.png": "face_21136_11_blink.png",
+                "face_21136_12.png": "face_21136_12_blink.png",
+                "face_21136_13.png": "face_21136_13_blink.png"
+            }
+        };
+        
+        // 设置默认表情
+        const DEFAULT_EXPRESSIONS = {
+            pre: 'face_01136_03.png',
+            sun: 'face_11136_01.png',
+            moon: 'face_21136_01.png'
+        };
+
+        // 语音按钮与表情的映射关系（点击某个语音时显示对应的表情）
+        const voiceToExpressionMap = {
+            pre: {
+                4: "face_01136_05.png",
+                5: "face_01136_08.png",
+            },
+            sun: {
+                1: "face_11136_03.png",
+                2: "face_11136_04.png"
+            },
+            moon: {
+                1: "face_21136_03.png",
+                2: "face_21136_04.png"
+            }
+        };
+
+        // 等待DOM加载完成后再设置配置并初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置配置并初始化
+            characterVoiceUI.setConfig({
+                voiceData,
+                audioMap,
+                voiceLabels,
+                bodyFrames,
+                headOffsets,
+                headFrames,
+                blinkMap,
+                voiceToExpressionMap,
+                DEFAULT_EXPRESSIONS,
+                imageMap
+            });
+
+            // 初始化UI
+            characterVoiceUI.init();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,427 @@
+/* 全局样式定义 */
+:root {
+    --gold: #d4ba5b;
+}
+
+body {
+    margin: 0;
+    font-family: '中文字体', sans-serif;
+    background: url('./picture/background.png') repeat fixed;
+    color: var(--gold);
+}
+
+/* 返回按钮样式 */
+.return-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 999;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.return-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.return-btn:hover {
+    transform: scale(1.1);
+}
+
+/* 主容器样式 */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* 内容容器样式 */
+.container {
+    display: flex;
+    flex: 1;
+    height: 100vh;
+}
+
+/* 左侧面板样式 */
+.left-panel {
+    flex: 7;
+    background: url('./picture/background2.png') repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 100vh;
+}
+
+/* 右侧面板样式 */
+.right-panel {
+    flex: 5;
+    padding: 20px;
+    min-width: 560px;
+    background: transparent;
+    min-height: 100%;
+}
+
+/* 角色艺术图容器样式 */
+.character-art-container {
+    position: relative;
+    width: 100%;
+    min-height: 95%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: top center;
+}
+
+/* 角色艺术图样式 */
+.character-art {
+    max-height: 95vh;
+    margin-top: 0px;
+    margin-bottom: -5px;
+    width: auto;
+    height: auto;
+    max-width: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    object-fit: contain;
+    cursor: grab;
+    transform-origin: center top;
+}
+
+.character-art:active {
+    cursor: grabbing;
+}
+
+/* 缩放按钮样式 */
+.zoom-btn {
+    position: absolute;
+    top: 32px;
+    left: 60px;
+    width: 40px;
+    height: 40px;
+    background-size: contain;
+    cursor: pointer;
+    z-index: 10;
+    border: none;
+    background-color: transparent;
+}
+
+/* 表情导航按钮样式 */
+.expression-nav-btn {
+    position: absolute;
+    left: 60px;
+    width: 40px;
+    height: 40px;
+    background-size: contain;
+    cursor: pointer;
+    z-index: 10;
+    border: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.prev-btn {
+    top: 80px;
+}
+
+.next-btn {
+    top: 130px;
+}
+
+/* CG画廊样式 */
+.cg-container {
+    padding: 25px;
+    margin: 20px;
+    border-radius: 12px;
+}
+
+.cg-gallery {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 70px;
+}
+
+.cg-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.cg-image {
+    width: 100%;
+    height: 540px;
+    object-fit: cover;
+    object-position: center center;
+    border-radius: 8px;
+    border: 2px solid rgba(212, 186, 91, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: block;
+}
+
+.cg-caption {
+    color: #d4ba5b;
+    margin-top: 15px;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* 觉醒按钮样式 */
+.awaken-btns {
+    display: flex;
+    gap: 50px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+}
+
+.awaken-btn {
+    width: 170px;
+    height: 44px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+    position: relative;
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.awaken-btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.awaken-btn.off::after {
+    background-image: url('./picture/buttonoff.png');
+}
+
+.awaken-btn.on::after {
+    background-image: url('./picture/buttonin.png');
+}
+
+.awaken-btn span {
+    position: relative;
+    z-index: 2;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    color: var(--gold);
+}
+
+/* 角色档案样式 */
+.profile-container {
+    position: relative;
+    margin: 5px 0;
+    padding: 15px 0;
+}
+
+.profile-content {
+    padding: 15px;
+    background: rgba(212, 186, 91, 0.1);
+    color: var(--gold);
+    border-left: 1px solid rgba(212, 186, 91, 0.3);
+    border-right: 1px solid rgba(212, 186, 91, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.profile-border {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: auto 100%;
+    image-rendering: crisp-edges;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.profile-border-top {
+    top: 13px;
+    background-image: url('./picture/边框组/上.png');
+    transform: translateY(-50%);
+}
+
+.profile-border-bottom {
+    bottom:10px;
+    background-image: url('./picture/边框组/下.png');
+    transform: translateY(50%);
+}
+
+.profile-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.profile-text {
+    font-size: 15px;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+/* 语音列表样式 */
+.voice-list {
+    height: calc(100vh - 400px);
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.voice-item {
+    background: rgba(255, 255, 255, 0.5);
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.voice-item:hover {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+/* 标题样式 */
+h1, h2, .subtitle {
+    color: var(--gold);
+    margin: 5px 0;
+}
+
+/* 英文字体样式 */
+.english-text {
+    font-family: '英文字体', sans-serif;
+}
+
+/* 小彩蛋GIF样式 */
+.gif-sticker {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 100px;
+    height: 110px;
+    opacity: 0.7;
+}
+
+/* 字体定义 */
+@font-face {
+    font-family: '中文字体';
+    src: local('中文字体'), url('./fonts/中文字体.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: '英文字体';
+    src: local('英文字体'), url('./fonts/英文字体.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        min-height: auto;
+    }
+    
+    .left-panel,
+    .right-panel {
+        width: 100%;
+        min-width: auto;
+        height: 50vh;
+    }
+    
+    .character-art {
+        max-height: 45vh;
+    }
+    
+    .cg-image {
+        height: 300px;
+    }
+}
+
+/* 滚动条样式 */
+.voice-list::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.voice-list::-webkit-scrollbar-track {
+    background: rgba(255,255, 255, 0.5);
+    border-radius: 5px;
+}
+
+.voice-list::-webkit-scrollbar-thumb {
+    background: rgba(212, 186, 91, 0.5);
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.voice-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 186, 91, 0.7);
+}
+
+/* 表情按钮容器样式 */
+.expression-container {
+    position: absolute;
+    top: 80px;
+    left: 60px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.expression-btn {
+    width: 40px;
+    height: 40px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    transition: all 0.2s;
+}
+
+.expression-btn:hover {
+    border-color: var(--gold);
+    transform: scale(1.1);
+}
+
+.expression-btn.active {
+    border-color: var(--gold);
+    box-shadow: 0 0 8px rgba(212, 186, 91, 0.6);
+}
+
+/* 角色画布样式 */
+#characterCanvas {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 90vh;
+    display: block;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>语音界面</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <!-- 返回按钮 -->
+    <a href="../汇总页v2.0.html" class="return-btn">
+        <img src="../picture/返回.png" alt="返回按钮">
+    </a>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 内容容器 -->
+        <div class="container">
+            <!-- 左侧面板 -->
+            <div class="left-panel">
+                <div class="character-art-container">
+                    <!-- 放大/缩小按钮 -->
+                    <button id="zoomBtn" class="zoom-btn" style="background-image: url('../picture/放大.png')"></button>
+                    <!-- 角色艺术图 -->
+                    <img id="characterArt" src="picture/pre.png" alt="Character Art" class="character-art">
+                </div>
+            </div>
+
+            <!-- 右侧面板 -->
+            <div class="right-panel">
+                <!-- 角色名称 -->
+                <h1>阿尔弗雷德</h1>
+                <h2>Alfred</h2>
+                <div class="subtitle">华丽的恶食盛宴</div>
+                <div class="subtitle english-text">CV:横田纮一</div>
+
+                <!-- 角色档案 -->
+                <div class="profile-container">
+                    <div class="profile-border profile-border-top"></div>
+                    <div class="profile-content">
+                        <div class="profile-title">档案</div>
+                        <div class="profile-text">
+                            红酒之国•多米尼亚的王子。对大部分的娱乐消遣都有经验，是个从容的成年人。他的父亲是吸血鬼，母亲是人类。今年品质最好的红酒解禁了，他邀请你参加在多米尼亚举行的试饮会。能够和你一起品尝红酒，他感到很开心。
+                        </div>
+                    </div>
+                    <div class="profile-border profile-border-bottom"></div>
+                </div>
+                
+                <!-- 觉醒状态切换按钮 -->
+                <div class="awaken-btns">
+                    <button class="awaken-btn on" data-type="pre"><span>觉醒前</span></button>
+                    <button class="awaken-btn off" data-type="star"><span>星觉</span></button>
+                </div>
+
+                <!-- 语音列表 -->
+                <div class="voice-list" id="voiceList"></div>
+            </div>
+        </div>
+
+        <!-- CG画廊 -->
+        <div class="cg-container">
+            <div class="cg-gallery">
+                <div class="cg-item">
+                    <img src="cg/pre.jpg" class="cg-image">
+                    <div class="cg-caption">觉醒前</div>
+                </div>
+                <div class="cg-item">
+                    <img src="cg/star.jpg" class="cg-image">
+                    <div class="cg-caption">星觉</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 小彩蛋GIF -->
+    <img src="../picture/小彩蛋.gif" alt="小彩蛋" class="gif-sticker" onerror="this.style.display='none'">
+
+    <script>
+        // 定义CharacterVoiceUI类，用于模块化管理语音界面
+        class CharacterVoiceUI {
+            constructor() {
+                this.currentAwaken = 'pre';
+                this.currentAudio = null;
+                this.isZoomed = false;
+                this.isDragging = false;
+                this.startX = 0;
+                this.startY = 0;
+                this.currentTranslateX = 0;
+                this.currentTranslateY = 0;
+                this.currentScale = 1;
+            }
+
+            // 设置配置数据
+            setConfig(config) {
+                this.voiceData = config.voiceData;
+                this.audioMap = config.audioMap;
+                this.voiceLabels = config.voiceLabels;
+                this.characterArtMap = config.characterArtMap;
+            }
+
+            // 初始化界面
+            init() {
+                this.bindEvents();
+                this.updateUI();
+            }
+
+            // 绑定事件
+            bindEvents() {
+                // 觉醒状态切换按钮
+                document.querySelectorAll('.awaken-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.currentAwaken = btn.dataset.type;
+                        this.updateUI();
+                    });
+                });
+
+                // 缩放按钮
+                const zoomBtn = document.getElementById('zoomBtn');
+                const characterArt = document.getElementById('characterArt');
+                
+                if (zoomBtn) {
+                    zoomBtn.addEventListener('click', () => this.toggleZoom());
+                }
+
+                // 拖拽事件
+                if (characterArt) {
+                    characterArt.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                }
+                
+                document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                document.addEventListener('mouseup', () => this.handleMouseUp());
+                document.addEventListener('mouseleave', () => this.handleMouseUp());
+            }
+
+            // 更新UI
+            updateUI() {
+                // 切换按钮状态
+                document.querySelectorAll('.awaken-btn').forEach(btn => {
+                    btn.classList.toggle('on', btn.dataset.type === this.currentAwaken);
+                    btn.classList.toggle('off', btn.dataset.type !== this.currentAwaken);
+                });
+
+                // 更新角色艺术图
+                const characterArt = document.getElementById('characterArt');
+                if (characterArt && this.characterArtMap) {
+                    characterArt.src = this.characterArtMap[this.currentAwaken];
+                }
+                
+                // 重置缩放
+                this.resetZoom();
+
+                // 更新语音列表
+                const listContainer = document.getElementById('voiceList');
+                if (listContainer && this.audioMap) {
+                    listContainer.innerHTML = (this.audioMap[this.currentAwaken] || []).map((audioPath, index) => {
+                        // 获取标签，如果没有定义则使用默认值
+                        let label = `${this.getAwakenDisplayName()} ${index+1}`;
+                        if (this.voiceLabels && this.voiceLabels[this.currentAwaken] && this.voiceLabels[this.currentAwaken][index]) {
+                            label = `${this.voiceLabels[this.currentAwaken][index]} - ${this.getAwakenDisplayName()}`;
+                        }
+                        
+                        // 获取文本内容，如果没有定义则留空
+                        let text = '';
+                        if (this.voiceData && this.voiceData[this.currentAwaken] && this.voiceData[this.currentAwaken][index]) {
+                            text = this.voiceData[this.currentAwaken][index];
+                        }
+                        
+                        return `<div class="voice-item" onclick="characterVoiceUI.playAudio(${index})">
+                            ${label}<br>
+                            <span>${text}</span>
+                        </div>`;
+                    }).join('');
+                }
+            }
+
+            // 获取觉醒状态显示名称
+            getAwakenDisplayName() {
+                switch(this.currentAwaken) {
+                    case 'sun': return '日觉';
+                    case 'moon': return '月觉';
+                    case 'star': return '星觉';
+                    default: return '觉醒前';
+                }
+            }
+
+            // 播放音频
+            playAudio(index) {
+                if (this.currentAudio) {
+                    this.currentAudio.pause();
+                    this.currentAudio.currentTime = 0;
+                }
+
+                const audioPath = this.audioMap[this.currentAwaken][index];
+                if (audioPath) {
+                    try {
+                        this.currentAudio = new Audio(audioPath);
+                        this.currentAudio.play().catch(error => {
+                            console.error("播放失败:", error);
+                            alert("无法播放音频文件: " + audioPath);
+                        });
+                    } catch (e) {
+                        console.error("音频加载错误:", e);
+                        alert("无法播放音频文件: " + audioPath);
+                    }
+                } else {
+                    alert("没有可用的音频文件");
+                }
+            }
+
+            // 切换缩放
+            toggleZoom() {
+                if (this.isZoomed) {
+                    this.resetZoom(true);
+                } else {
+                    this.zoomIn();
+                }
+            }
+
+            // 放大
+            zoomIn() {
+                this.currentScale = 3;
+                this.resetZoom();
+                this.isZoomed = true;
+                const zoomBtn = document.getElementById('zoomBtn');
+                const characterArt = document.getElementById('characterArt');
+                
+                if (zoomBtn) {
+                    zoomBtn.style.backgroundImage = "url('../picture/缩小.png')";
+                }
+                if (characterArt) {
+                    characterArt.style.cursor = 'grab';
+                }
+            }
+
+            // 重置缩放
+            resetZoom(resetScale = false) {
+                this.currentTranslateX = 0;
+                this.currentTranslateY = 0;
+                
+                if (resetScale) {
+                    this.currentScale = 1;
+                    this.isZoomed = false;
+                    const zoomBtn = document.getElementById('zoomBtn');
+                    const characterArt = document.getElementById('characterArt');
+                    
+                    if (zoomBtn) {
+                        zoomBtn.style.backgroundImage = "url('../picture/放大.png')";
+                    }
+                    if (characterArt) {
+                        characterArt.style.cursor = 'default';
+                    }
+                }
+                
+                this.updateImageTransform();
+            }
+
+            // 更新图像变换
+            updateImageTransform() {
+                const characterArt = document.getElementById('characterArt');
+                if (characterArt) {
+                    characterArt.style.transform = `scale(${this.currentScale}) translate(${this.currentTranslateX}px, ${this.currentTranslateY}px)`;
+                }
+            }
+
+            // 鼠标按下处理
+            handleMouseDown(e) {
+                if (!this.isZoomed) return;
+                
+                this.isDragging = true;
+                this.startX = e.clientX - this.currentTranslateX;
+                this.startY = e.clientY - this.currentTranslateY;
+                const characterArt = document.getElementById('characterArt');
+                if (characterArt) {
+                    characterArt.style.cursor = 'grabbing';
+                }
+                e.preventDefault(); 
+            }
+
+            // 鼠标移动处理
+            handleMouseMove(e) {
+                if (!this.isDragging || !this.isZoomed) return;
+                
+                this.currentTranslateX = e.clientX - this.startX;
+                this.currentTranslateY = e.clientY - this.startY;
+                
+                const characterArt = document.getElementById('characterArt');
+                if (characterArt) {
+                    const maxX = (characterArt.offsetWidth * this.currentScale - characterArt.offsetWidth) / 2;
+                    const maxY = (characterArt.offsetHeight * this.currentScale - characterArt.offsetHeight) / 2;
+                    
+                    this.currentTranslateX = Math.min(Math.max(this.currentTranslateX, -maxX), maxX);
+                    this.currentTranslateY = Math.min(Math.max(this.currentTranslateY, -maxY), maxY);
+                }
+                
+                this.updateImageTransform();
+            }
+
+            // 鼠标释放处理
+            handleMouseUp() {
+                this.isDragging = false;
+                const characterArt = document.getElementById('characterArt');
+                if (characterArt) {
+                    characterArt.style.cursor = this.isZoomed ? 'grab' : 'default';
+                }
+            }
+        }
+
+        // 创建全局实例
+        const characterVoiceUI = new CharacterVoiceUI();
+
+        // 定义语音数据
+        const voiceData = {
+            pre: [
+                "你好像还是有点困呢。昨晚的红酒现在还在让你做梦吗?",
+                "晚上再沉醉于美酒吧,白天我带你参观酒庄",
+                "你不觉得夜晚不管对于吸血鬼还是对于恋人们,都是极为舒适的时光吗?",
+                "若是今后每年红酒的解封日都能和你一起沉醉,该有多幸福啊",
+                "吸血鬼和人类虽有差异,但还是会互相吸引……和你在一起后,我更加这么想",
+                "你那温柔的笑容总是能俘获我的心。今晚我似乎要你而沉醉",
+                "不能让试饮会被搞砸了",
+                "换上新杯子，来举杯共饮吧",
+                "我也要上了",
+                "我好像有些醉了",
+                "你的体贴之心……我感受到了",
+                "我绝对不会后悔爱过你",
+                "差不多该喝点红酒了",
+                "下面该展现我们的力量了",
+                "能在红酒的风味变差之前结束，真是太好了",
+                "你喜欢多米尼亚的红酒吗？哎呀，你好像已经脸红了",
+                "不管怎么变化，我对你的爱是不会动摇的",
+                "感谢你愿意牵起我的手",
+                "没关系，按照你的步调前进就可以了",
+                "你的存在支撑着我",
+                "你……到底能让我着迷到什么程度呢？"
+            ],
+            star: [
+                "你的脸顿泛起红色,是因为红洒吗……还是因为我?",
+                "每次一起克服而难的时候,我都会渐渐被你吸引……我爱你",
+                "虽然种族和时间的流逝不同,但并不会妨碍我爱上你",
+                "在你闭上眼睛之前,我会一直在你身边",
+                "你对我的爱,让我对末来下定了决心。今后一起生活下去吧"
+            ],
+        };
+    
+        // 定义音频文件路径
+        const audioMap = {
+            pre: [
+                'audio/pre/问候-早晨.aac',
+                'audio/pre/问候-下午.aac',
+                'audio/pre/问候-晚上.aac',
+                'audio/pre/打招呼_1.aac',
+                'audio/pre/打招呼_2.aac',
+                'audio/pre/详情.aac',
+                'audio/pre/战斗开始.aac',
+                'audio/pre/得分.aac',
+                'audio/pre/攻击.aac',
+                'audio/pre/受到的伤害.aac',
+                'audio/pre/回复.aac',
+                'audio/pre/战斗技能发动.aac',
+                'audio/pre/fever开始.aac',
+                'audio/pre/食梦兽的回合结束.aac',
+                'audio/pre/任务完成.aac',
+                'audio/pre/王子界面.aac',
+                'audio/pre/训练.aac',
+                'audio/pre/战斗成员编成.aac',
+                'audio/pre/Nice.aac',
+                'audio/pre/Great.aac',
+                'audio/pre/Excellent.aac'
+            ],
+            star: [
+                'audio/star/greeting_1.aac',
+                'audio/star/greeting_2.aac',
+                'audio/star/details.aac',
+                'audio/star/skill.aac',
+                'audio/star/awakening.aac'
+            ],
+        };
+    
+        // 定义语音标签
+        const voiceLabels = {
+            pre: [
+                '问候 - 早晨',
+                '问候 - 下午',
+                '问候 - 晚上',
+                '打招呼',
+                '打招呼',
+                '详情',
+                '战斗开始',
+                '得分',
+                '攻击',
+                '受到的伤害',
+                '回复',
+                '战斗技能发动',
+                'fever开始',
+                '食梦兽的回合结束',
+                '任务完成',
+                '王子界面',
+                '训练',
+                '战斗成员编成',
+                'Nice',
+                'Great',
+                'Excellent'
+            ],
+            star: [
+                '打招呼',
+                '打招呼',
+                '详情',
+                '战斗技能发动',
+                '觉醒'
+            ],
+        };
+    
+        // 定义角色艺术图路径
+        const characterArtMap = {
+            pre: 'picture/pre.png',
+            star: 'picture/star.png'
+        };
+
+        // DOM加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置配置并初始化
+            characterVoiceUI.setConfig({
+                voiceData,
+                audioMap,
+                voiceLabels,
+                characterArtMap
+            });
+
+            // 初始化UI
+            characterVoiceUI.init();
+        });
+    </script>
+</body>
+</html>

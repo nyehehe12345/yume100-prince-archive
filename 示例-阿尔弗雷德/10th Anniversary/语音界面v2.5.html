@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>语音界面</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <a href="../汇总页v2.0.html" class="return-btn">
+        <img src="../picture/返回.png" alt="返回按钮">
+    </a>
+    
+    <div class="main-container">
+        <div class="container">
+            <div class="left-panel">
+                <div class="character-art-container">
+                    <button id="zoomBtn" class="zoom-btn" style="background-image: url('../picture/放大.png')"></button>
+                    <button id="prevExpressionBtn" class="expression-nav-btn prev-btn" style="background-image: url('../picture/上.png')"></button>
+                    <button id="nextExpressionBtn" class="expression-nav-btn next-btn" style="background-image: url('../picture/下.png')"></button>
+                    <canvas id="characterArt" width="1204" height="2378" class="character-art"></canvas>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <h1>阿尔弗雷德</h1>
+                <h2>Alfred</h2>
+                <div class="subtitle">10th Anniversary</div>
+                <div class="subtitle english-text">CV:横田纮一</div>
+                
+                <div class="profile-container">
+                    <div class="profile-border profile-border-top"></div>
+                    <div class="profile-content">
+                        <div class="profile-title">档案</div>
+                        <div class="profile-text">
+                            红酒之国·多米尼亚的王子。从容的成年人,常见的娱乐基本都体验过。父亲是吸血鬼,母亲是人类。为了在梦之古城中款待你,他似乎准备了美味的食物和特别的红酒。
+                        </div>
+                    </div>
+                    <div class="profile-border profile-border-bottom"></div>
+                </div>
+                
+                <div class="voice-list" id="voiceList" style="height: 370px; overflow-y: auto;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <img src="../picture/小彩蛋.gif" alt="小彩蛋" class="gif-sticker" onerror="this.style.display='none'">
+    
+    <script src="../character-voice-ui.js"></script>
+    <!-- <script src="../head-offset-debug.js"></script> -->
+    <script>
+        // 语音文本内容
+        const voiceData = {
+            pre: [
+                "早上好。我醒得比平时早,或许是为了见你吧",
+                "已经吃过饭了吗?如果还没有的话,一起吃怎么样?当然,也少不了红酒",
+                "如果你要熬夜的话,我很乐意作陪。直到你入睡前……我会一直陪在你身边",
+                "如果我选的红酒能让你展露笑颜,那就再好不过了",
+                "你似乎脸很红……如果你说你没醉,那可以让我更仔细地看看你的脸吗?",
+                "希望今后和你在一起的时光能一直延续。这是我毫无矫饰的真心话哦",
+                "我不会让别人碰你的",
+                "继续享受红酒的乐趣吧,就我们两个人",
+                "别来捣乱",
+                "搞砸了吗",
+                "不用担心,谢谢",
+                "今晚,只有你能占据我的心",
+                "为了避免你受伤,就待在我身后吧",
+                "我不想拖太久",
+                "能守护你的笑容,真是太好了",
+                "我保证会带始你一个特别的夜晚。来,我们一起走吧",
+                "我为拥有这份能保护你的力量而感到骄傲",
+                "护送的任务就交给我吧",
+                "在逞强之前,先依赖一下我吧",
+                "不能让你独自背负这一切呢",
+                "想永远凝视着你……此刻的我正这么想着",
+                "让我们用一瓶最适合今天的红酒，为你即将到来的幸福干杯吧。生日快乐",
+            ],
+        };
+
+        // 音频文件存放路径
+        const audioMap = {
+            pre: [
+                'audio/pre/问候-早晨.wav',
+                'audio/pre/问候-下午.wav',
+                'audio/pre/问候-晚上.wav',
+                'audio/pre/打招呼_1.wav',
+                'audio/pre/打招呼_2.wav',
+                'audio/pre/详情.wav',
+                'audio/pre/战斗开始.wav',
+                'audio/pre/得分.wav',
+                'audio/pre/攻击.wav',
+                'audio/pre/受到的伤害.wav',
+                'audio/pre/回复.wav',
+                'audio/pre/战斗技能发动.wav',
+                'audio/pre/fever开始.wav',
+                'audio/pre/食梦兽的回合结束.wav',
+                'audio/pre/任务完成.wav',
+                'audio/pre/王子界面.wav',
+                'audio/pre/训练.wav',
+                'audio/pre/战斗成员编成.wav',
+                'audio/pre/nice.wav',
+                'audio/pre/great.wav',
+                'audio/pre/excellent.wav',
+                'audio/pre/生日.wav',
+                'audio/pre/登录界面.wav',
+            ],
+        };
+
+        // 各语音的标签名称（显示在界面上）
+        const voiceLabels = {
+            pre: [
+                '问候 - 早晨',
+                '问候 - 下午',
+                '问候 - 晚上',
+                '打招呼',
+                '打招呼',
+                '详情',
+                '战斗开始',
+                '得分',
+                '攻击',
+                '受到的伤害',
+                '回复',
+                '战斗技能发动',
+                'fever开始',
+                '食梦兽的回合结束',
+                '任务完成',
+                '王子界面',
+                '训练',
+                '战斗成员编成',
+                'Nice',
+                'Great',
+                'Excellent',
+                '生日',
+                '登录界面',
+            ]
+        };
+        
+        // 图片资源存放路径
+        const imageMap = {
+            pre: { body: 'picture/pri_01285_sps.png', head: 'picture/pri_01285_sps_all.png' }
+        };
+        
+        // 全身立绘图信息（位置、尺寸等）
+        const bodyFrames = {
+            pre: {
+                spriteOffset:"{0,230}",
+                spriteSize:"{1722,2366}",
+                textureRect: "{1,1},{1722,2366}",
+            }
+        };
+
+        // 表情的偏移量
+        const headOffsets = {
+            pre: "{4,786}"
+        };
+
+        // 表情信息（各种表情的位置、尺寸等）
+        const headFrames = {
+            pre: {
+                "face_01285_01.png": "{1,1},{274,334}",
+                "face_01285_01_blink.png": "{1,337},{274,334}",
+                "face_01285_02.png": "{1,673},{274,334}",
+                "face_01285_02_blink.png": "{1,1009},{274,334}",
+                "face_01285_03.png": "{1,1},{274,334}",
+                "face_01285_03_blink.png": "{1,337},{274,334}",
+                "face_01285_04.png": "{1,1345},{274,334}",
+                "face_01285_04_blink.png": "{1,1681},{274,334}",
+                "face_01285_05.png": "{277,1},{274,334}",
+                "face_01285_05_blink.png": "{553,1},{274,334}",
+                "face_01285_06.png": "{829,1},{274,334}",
+                "face_01285_06_blink.png": "{1105,1},{274,334}",
+                "face_01285_07.png": "{1381,1},{274,334}",
+                "face_01285_07_blink.png": "{1657,1},{274,334}",
+                "face_01285_08.png": "{277,337},{274,334}",
+                "face_01285_08_blink.png": "{277,673},{274,334}",
+                "face_01285_09.png": "{277,1009},{274,334}",
+                "face_01285_09_blink.png": "{277,1345},{274,334}",
+                "face_01285_10.png": "{277,1681},{274,334}",
+                "face_01285_10_blink.png": "{553,337},{274,334}",
+                "face_01285_11.png": "{829,337},{274,334}",
+                "face_01285_11_blink.png": "{1105,337},{274,334}",
+                "face_01285_12.png": "{1381,337},{274,334}",
+                "face_01285_12_blink.png": "{1657,337},{274,334}",
+                "face_01285_13.png": "{553,673},{274,334}",
+                "face_01285_13_blink.png": "{553,1009},{274,334}",
+                "face_01285_14.png": "{553,1345},{274,334}",
+                "face_01285_14_blink.png": "{553,1681},{274,334}",
+                "face_01285_15.png": "{1,1009},{274,334}",
+                "face_01285_15_blink.png": "{1,1009},{274,334}",
+                "face_01285_16.png": "{1,337},{274,334}",
+                "face_01285_16_blink.png": "{1,337},{274,334}",
+                "face_01285_17.png": "{1,1681},{274,334}",
+                "face_01285_17_blink.png": "{1,1681},{274,334}",
+                "face_01285_18.png": "{553,1},{274,334}",
+                "face_01285_18_blink.png": "{553,1},{274,334}",
+                "face_01285_19.png": "{1105,1},{274,334}",
+                "face_01285_19_blink.png": "{1105,1},{274,334}",
+                "face_01285_20.png": "{1657,1},{274,334}",
+                "face_01285_20_blink.png": "{1657,1},{274,334}",
+                "face_01285_21.png": "{277,673},{274,334}",
+                "face_01285_21_blink.png": "{277,673},{274,334}",
+                "face_01285_22.png": "{277,1345},{274,334}",
+                "face_01285_22_blink.png": "{277,1345},{274,334}",
+                "face_01285_23.png": "{553,337},{274,334}",
+                "face_01285_23_blink.png": "{553,337},{274,334}",
+                "face_01285_24.png": "{1105,337},{274,334}",
+                "face_01285_24_blink.png": "{1105,337},{274,334}",
+                "face_01285_25.png": "{1657,337},{274,334}",
+                "face_01285_25_blink.png": "{1657,337},{274,334}",
+                "face_01285_26.png": "{553,1009},{274,334}",
+                "face_01285_26_blink.png": "{553,1009},{274,334}",
+                "face_01285_27.png": "{553,1681},{274,334}",
+                "face_01285_27_blink.png": "{553,1681},{274,334}"
+            }
+        };
+
+        // 表情与眨眼表情的映射关系
+        const blinkMap = {
+            pre: {
+                "face_01285_01.png": "face_01285_01_blink.png",
+                "face_01285_02.png": "face_01285_02_blink.png",
+                "face_01285_03.png": "face_01285_03_blink.png",
+                "face_01285_04.png": "face_01285_04_blink.png",
+                "face_01285_05.png": "face_01285_05_blink.png",
+                "face_01285_06.png": "face_01285_06_blink.png",
+                "face_01285_07.png": "face_01285_07_blink.png",
+                "face_01285_08.png": "face_01285_08_blink.png",
+                "face_01285_09.png": "face_01285_09_blink.png",
+                "face_01285_10.png": "face_01285_10_blink.png",
+                "face_01285_11.png": "face_01285_11_blink.png",
+                "face_01285_12.png": "face_01285_12_blink.png",
+                "face_01285_13.png": "face_01285_13_blink.png"
+            }
+        };
+        
+        // 设置默认表情
+        const DEFAULT_EXPRESSIONS = {
+            pre: 'face_01285_01.png'
+        };
+
+        // 语音按钮与表情的映射关系（点击某个语音时显示对应的表情）
+        const voiceToExpressionMap = {
+            pre: {
+                4: "face_01285_03.png",
+                5: "face_01285_04.png",
+            }
+        };
+
+        // 等待DOM加载完成后再设置配置并初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置配置并初始化
+            characterVoiceUI.setConfig({
+                voiceData,
+                audioMap,
+                voiceLabels,
+                bodyFrames,
+                headOffsets,
+                headFrames,
+                blinkMap,
+                voiceToExpressionMap,
+                DEFAULT_EXPRESSIONS,
+                imageMap
+            });
+
+            // 初始化UI
+            characterVoiceUI.init();
+        });
+    </script>
+</body>
+</html>

@@ -307,10 +307,6 @@ h1, h2, .subtitle {
     margin: 5px 0;
 }
 
-/* 英文字体样式 */
-.english-text {
-    font-family: '英文字体', sans-serif;
-}
 
 /* 小彩蛋GIF样式 */
 .gif-sticker {
@@ -325,16 +321,7 @@ h1, h2, .subtitle {
 /* 字体定义 */
 @font-face {
     font-family: '中文字体';
-    src: local('中文字体'), url('./fonts/中文字体.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: '英文字体';
-    src: local('英文字体'), url('./fonts/英文字体.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
+    src: local('中文字体'), url('./fonts/ModeMinAStd-B.ttf') format('truetype');
 }
 
 /* 响应式设计 */

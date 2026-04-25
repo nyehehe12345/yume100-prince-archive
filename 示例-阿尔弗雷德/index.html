@@ -20,9 +20,7 @@
 
         @font-face {
             font-family: 'ChineseFont';
-            src: url('./fonts/中文字体.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
+            src: url('./fonts/ModeMinAStd-B2.ttf') format('truetype');
         }
 
         .title {
@@ -642,7 +640,7 @@
 
         .house-dialogues .dialogue-content {
             display: none;
-            padding-left: 40px; 
+            padding: 0 40px; 
             overflow-y: auto; /* 添加滚动条 */
             flex: 1;
         }
@@ -1028,6 +1026,7 @@
                     <div class="dialogue-buttons">
                         <button id="clickButton" onclick="showContent('click')">点击</button>
                         <button id="freeButton" onclick="showContent('free')">自由</button>
+                        <button id="eventButton" onclick="showContent('event')">节日</button>
                     </div>
                     <div id="clickContent" class="dialogue-content active">
                         <p>想吓我一跳吗?</p>
@@ -1053,6 +1052,18 @@
                         <p>你平时喜欢什么样的书？我想读读看你喜欢的书</p>
                         <p>在露台上悠闲地欣赏风景感觉也不赖</p>
                         <p>我喜欢红酒，也喜欢玩乐……意外吗？</p>
+                        <p>为了和你愉快地共饮，来调一杯葡萄酒吧</p>
+                    </div>
+                    <div id="eventContent" class="dialogue-content">
+                        <p>新年：新年快乐，为了庆祝和你共同迎来新的一年，开一瓶上好的葡萄酒吧</p>
+                        <p>六周年：为什么呢，光是看到她的笑容，我就会觉得非常满足</p>
+                        <p>愚人节：在你刚进公司的时候，我就一直在看着你。最近你的状态不错，很有活力呢</p>
+                        <p>婚礼：今后如果要和别人一起生活下去……我希望那人能是你</p>
+                        <p>夏天：要来一杯桑格利亚汽酒吗？喝起来有水果的甘甜味，对你来说应该很容易入口</p>
+                        <p>万圣节：Trick or Treat。在今晚的片刻时光中，我会对你进行恶作剧的……</p>
+                        <p>圣诞节：圣诞快乐。来，开始只属于我们两人的派对吧</p>
+                        <p></p>
+                        <p></p>
                         <p></p>
                     </div>
                     <img src="./picture/chara_s.png" alt="角色图片" onerror="this.style.display='none'">
@@ -1353,18 +1364,22 @@
             });
         }
 
-        function showContent(contentType) {
-            const clickContent = document.getElementById('clickContent');
-            const freeContent = document.getElementById('freeContent');
+function showContent(contentType) {
+    const clickContent = document.getElementById('clickContent');
+    const freeContent = document.getElementById('freeContent');
+    const eventContent = document.getElementById('eventContent');
 
-            if (contentType === 'click') {
-                clickContent.classList.add('active');
-                freeContent.classList.remove('active');
-            } else if (contentType === 'free') {
-                freeContent.classList.add('active');
-                clickContent.classList.remove('active');
-            }
-        }
+    clickContent.classList.remove('active');
+    freeContent.classList.remove('active');
+    eventContent.classList.remove('active');
+
+    if (contentType === 'click') {
+        clickContent.classList.add('active');
+    } else if (contentType === 'free') {
+        freeContent.classList.add('active');
+    } else if (contentType === 'event') {
+        eventContent.classList.add('active');
+    }}
     </script>
 </body>
 </html>

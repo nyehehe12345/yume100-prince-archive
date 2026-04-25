@@ -1,0 +1,19 @@
+        function showContent(contentType) {
+            const clickContent = document.getElementById('clickContent');
+            const freeContent = document.getElementById('freeContent');
+            const eventContent = document.getElementById('eventContent');
+
+            // 先隐藏所有内容
+            clickContent.classList.remove('active');
+            freeContent.classList.remove('active');
+            eventContent.classList.remove('active');
+
+            // 显示对应的内容
+            if (contentType === 'click') {
+                clickContent.classList.add('active');
+            } else if (contentType === 'free') {
+                freeContent.classList.add('active');
+            } else if (contentType === 'event') {
+                eventContent.classList.add('active');
+            }
+        }
